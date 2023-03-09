@@ -215,26 +215,27 @@ private:
     char s[16];
     sprintf(s, "%d.%d.%d.%d", localIP[0], localIP[1], localIP[2], localIP[3]);
     char buf[1024];
-    
-    sprintf_P(buf,PSTR("<?xml version=\"1.0\" ?>"
-        "<root xmlns=\"urn:schemas-upnp-org:device-1-0\">"
-        "<specVersion><major>1</major><minor>0</minor></specVersion>"
-        "<URLBase>http://%s:80/</URLBase>"
-        "<device>"
-          "<deviceType>urn:schemas-upnp-org:device:Basic:1</deviceType>"
-          "<friendlyName>Espalexa (%s:80)</friendlyName>"
-          "<manufacturer>Royal Philips Electronics</manufacturer>"
-          "<manufacturerURL>http://www.philips.com</manufacturerURL>"
-          "<modelDescription>Philips hue Personal Wireless Lighting</modelDescription>"
-          "<modelName>Philips hue bridge 2012</modelName>"
-          "<modelNumber>929000226503</modelNumber>"
-          "<modelURL>http://www.meethue.com</modelURL>"
-          "<serialNumber>%s</serialNumber>"
-          "<UDN>uuid:2f402f80-da50-11e1-9b23-%s</UDN>"
-          "<presentationURL>index.html</presentationURL>"
-        "</device>"
-        "</root>"),s,s,escapedMac.c_str(),escapedMac.c_str());
-          
+
+    sprintf_P(buf, PSTR("<?xml version=\"1.0\" ?>"
+                        "<root xmlns=\"urn:schemas-upnp-org:device-1-0\">"
+                        "<specVersion><major>1</major><minor>0</minor></specVersion>"
+                        "<URLBase>http://%s:80/</URLBase>"
+                        "<device>"
+                        "<deviceType>urn:schemas-upnp-org:device:Basic:1</deviceType>"
+                        "<friendlyName>Espalexa %s (%s:80)</friendlyName>"
+                        "<manufacturer>Royal Philips Electronics</manufacturer>"
+                        "<manufacturerURL>http://www.philips.com</manufacturerURL>"
+                        "<modelDescription>Philips hue Personal Wireless Lighting</modelDescription>"
+                        "<modelName>Philips hue bridge 2012</modelName>"
+                        "<modelNumber>929000226503</modelNumber>"
+                        "<modelURL>http://www.meethue.com</modelURL>"
+                        "<serialNumber>%s</serialNumber>"
+                        "<UDN>uuid:2f402f80-da50-11e1-9b23-%s</UDN>"
+                        "<presentationURL>index.html</presentationURL>"
+                        "</device>"
+                        "</root>"),
+              s,  _friendlyName.c_str(),s, escapedMac.c_str(), escapedMac.c_str());
+
     server->send(200, "text/xml", buf);
     
     EA_DEBUGLN("Send setup.xml");
@@ -398,7 +399,12 @@ public:
     devices[currentDeviceCount] = d;
     return ++currentDeviceCount;
   }
-  
+  String _friendlyName;
+  void setFriendlyName(String name)
+  {
+    _friendlyName = name;
+  }
+
   //brightness-only callback
   uint8_t addDevice(String deviceName, BrightnessCallbackFunction callback, uint8_t initialValue = 0)
   {
