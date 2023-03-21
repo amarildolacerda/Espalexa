@@ -222,7 +222,7 @@ private:
                         "<URLBase>http://%s:80/</URLBase>"
                         "<device>"
                         "<deviceType>urn:schemas-upnp-org:device:Basic:1</deviceType>"
-                        "<friendlyName>Espalexa %s (%s:80)</friendlyName>"
+                        "<friendlyName>%s (%s:80)</friendlyName>"
                         "<manufacturer>Royal Philips Electronics</manufacturer>"
                         "<manufacturerURL>http://www.philips.com</manufacturerURL>"
                         "<modelDescription>Philips hue Personal Wireless Lighting</modelDescription>"
