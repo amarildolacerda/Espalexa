@@ -127,8 +127,8 @@ private:
       return "LST001";
     case EspalexaDeviceType::extendedcolor:
       return "LCT015";
-    case EspalexaDeviceType::motion:
-      return "SML001";
+    //case EspalexaDeviceType::motion:
+    //  return "SML001";
     default:
       return "";
     }
@@ -233,13 +233,17 @@ private:
     sprintf(s, "%d.%d.%d.%d", localIP[0], localIP[1], localIP[2], localIP[3]);
     char buf[1024];
 
+    String _fname = _friendlyName;
+    //if (currentDeviceCount > 0)
+    //  _fname = devices[0]->getName();
+
     sprintf_P(buf, PSTR("<?xml version=\"1.0\" ?>"
                         "<root xmlns=\"urn:schemas-upnp-org:device-1-0\">"
                         "<specVersion><major>1</major><minor>0</minor></specVersion>"
                         "<URLBase>http://%s:80/</URLBase>"
                         "<device>"
                         "<deviceType>urn:schemas-upnp-org:device:Basic:1</deviceType>"
-                        "<friendlyName>Espalexa %s(%s:80)</friendlyName>"
+                        "<friendlyName>%s (%s:80)</friendlyName>"
                         "<manufacturer>Royal Philips Electronics</manufacturer>"
                         "<manufacturerURL>http://www.philips.com</manufacturerURL>"
                         "<modelDescription>Philips hue Personal Wireless Lighting</modelDescription>"
@@ -251,8 +255,8 @@ private:
                         "<presentationURL>index.html</presentationURL>"
                         "</device>"
                         "</root>"),
-              s, _friendlyName.c_str(), s, escapedMac.c_str(), escapedMac.c_str());
-    Serial.printf("Alexa Name: %s \r\n", _friendlyName.c_str());
+              s, _fname.c_str(), s, escapedMac.c_str(), escapedMac.c_str());
+    Serial.printf("Alexa Name: %s \r\n", _fname.c_str());
     server->send(200, "text/xml", buf);
 
     EA_DEBUGLN("Send setup.xml");
@@ -436,18 +440,18 @@ public:
   }
   void setFriendlyName(const String name)
   {
-    EA_DEBUG("setFiendlyName() <- ");
+    //EA_DEBUG("setFiendlyName() <- ");
     _friendlyName = name;
-    EA_DEBUGLN(_friendlyName);
+    //EA_DEBUGLN(_friendlyName);
   }
 
   // brightness-only callback
   uint8_t addDevice(String deviceName, BrightnessCallbackFunction callback, uint8_t initialValue = 0)
   {
-    EA_DEBUG("Constructing device ");
-    EA_DEBUGLN((currentDeviceCount + 1));
     if (currentDeviceCount >= ESPALEXA_MAXDEVICES)
       return 0;
+    EA_DEBUG("Constructing device 1");
+    EA_DEBUGLN((currentDeviceCount + 1));
     EspalexaDevice *d = new EspalexaDevice(deviceName, callback, initialValue);
     return addDevice(d);
   }
@@ -455,20 +459,20 @@ public:
   // brightness-only callback
   uint8_t addDevice(String deviceName, ColorCallbackFunction callback, uint8_t initialValue = 0)
   {
-    EA_DEBUG("Constructing device ");
-    EA_DEBUGLN((currentDeviceCount + 1));
     if (currentDeviceCount >= ESPALEXA_MAXDEVICES)
       return 0;
+    EA_DEBUG("Constructing device 2");
+    EA_DEBUGLN((currentDeviceCount + 1));
     EspalexaDevice *d = new EspalexaDevice(deviceName, callback, initialValue);
     return addDevice(d);
   }
 
   uint8_t addDevice(String deviceName, DeviceCallbackFunction callback, EspalexaDeviceType t = EspalexaDeviceType::dimmable, uint8_t initialValue = 0)
   {
-    EA_DEBUG("Constructing device ");
-    EA_DEBUGLN((currentDeviceCount + 1));
     if (currentDeviceCount >= ESPALEXA_MAXDEVICES)
       return 0;
+    EA_DEBUG("Constructing device 3");
+    EA_DEBUGLN((currentDeviceCount + 1));
     EspalexaDevice *d = new EspalexaDevice(deviceName, callback, t, initialValue);
     return addDevice(d);
   }

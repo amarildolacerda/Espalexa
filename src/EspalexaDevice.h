@@ -23,8 +23,7 @@ enum class EspalexaDeviceType : uint8_t
   dimmable = 1,
   whitespectrum = 2,
   color = 3,
-  extendedcolor = 4,
-  motion = 5
+  extendedcolor = 4
 };
 enum class EspalexaDeviceProperty : uint8_t
 {
