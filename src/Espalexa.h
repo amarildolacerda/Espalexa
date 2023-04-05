@@ -127,8 +127,8 @@ private:
       return "LST001";
     case EspalexaDeviceType::extendedcolor:
       return "LCT015";
-    //case EspalexaDeviceType::motion:
-    //  return "SML001";
+    // case EspalexaDeviceType::motion:
+    //   return "SML001";
     default:
       return "";
     }
@@ -188,7 +188,9 @@ private:
 #ifndef ESPALEXA_NO_SUBPAGE
   void servePage()
   {
+#ifdef ESPALEXA_DEBUG
     EA_DEBUGLN("HTTP Req espalexa ...\n");
+#endif
     String res = "Hello from Espalexa!\r\n\r\n";
     for (int i = 0; i < currentDeviceCount; i++)
     {
@@ -211,10 +213,14 @@ private:
   // not found URI (only if internal webserver is used)
   void serveNotFound()
   {
+#ifdef ESPALEXA_DEBUG
     EA_DEBUGLN("Not-Found HTTP call:");
+#endif
 #ifndef ESPALEXA_ASYNC
+#ifdef ESPALEXA_DEBUG
     EA_DEBUGLN("URI: " + server->uri());
     EA_DEBUGLN("Body: " + server->arg(0));
+#endif
     if (!handleAlexaApiCall(server->uri(), server->arg(0)))
 #else
     EA_DEBUGLN("URI: " + server->url());
@@ -227,15 +233,17 @@ private:
   // send description.xml device property page
   void serveDescription()
   {
+#ifdef ESPALEXA_DEBUG
     EA_DEBUGLN("# Responding to description.xml ... #\n");
+#endif
     IPAddress localIP = WiFi.localIP();
     char s[16];
     sprintf(s, "%d.%d.%d.%d", localIP[0], localIP[1], localIP[2], localIP[3]);
     char buf[1024];
 
     String _fname = _friendlyName;
-    //if (currentDeviceCount > 0)
-    //  _fname = devices[0]->getName();
+    // if (currentDeviceCount > 0)
+    //   _fname = devices[0]->getName();
 
     sprintf_P(buf, PSTR("<?xml version=\"1.0\" ?>"
                         "<root xmlns=\"urn:schemas-upnp-org:device-1-0\">"
@@ -258,9 +266,10 @@ private:
               s, _fname.c_str(), s, escapedMac.c_str(), escapedMac.c_str());
     Serial.printf("Alexa Name: %s \r\n", _fname.c_str());
     server->send(200, "text/xml", buf);
-
+#ifdef ESPALEXA_DEBUG
     EA_DEBUGLN("Send setup.xml");
     EA_DEBUGLN(buf);
+#endif
   }
 
   // init the server
@@ -353,9 +362,11 @@ public:
   bool begin(ESP8266WebServer *externalServer = nullptr)
 #endif
   {
+#ifdef ESPALEXA_DEBUG
     EA_DEBUGLN("Espalexa Begin...");
     EA_DEBUG("MAXDEVICES ");
     EA_DEBUGLN(ESPALEXA_MAXDEVICES);
+#endif
     escapedMac = WiFi.macAddress();
     escapedMac.replace(":", "");
     escapedMac.toLowerCase();
@@ -378,10 +389,14 @@ public:
     {
 
       startHttpServer();
+#ifdef ESPALEXA_DEBUG
       EA_DEBUGLN("Done");
+#endif
       return true;
     }
+#ifdef ESPALEXA_DEBUG
     EA_DEBUGLN("Failed");
+#endif
     return false;
   }
 
@@ -400,8 +415,9 @@ public:
     if (packetSize < 1)
       return; // no new udp packet
 
+#ifdef ESPALEXA_DEBUG
     EA_DEBUGLN("Got UDP!");
-
+#endif
     unsigned char packetBuffer[packetSize + 1]; // buffer to hold incoming udp packet
     espalexaUdp.read(packetBuffer, packetSize);
     packetBuffer[packetSize] = 0;
@@ -414,13 +430,17 @@ public:
     if (strstr(request, "M-SEARCH") == nullptr)
       return;
 
+#ifdef ESPALEXA_DEBUG
     EA_DEBUGLN(request);
+#endif
     if (strstr(request, "ssdp:disc") != nullptr &&   // short for "ssdp:discover"
         (strstr(request, "upnp:rootd") != nullptr || // short for "upnp:rootdevice"
          strstr(request, "ssdp:all") != nullptr ||
          strstr(request, "asic:1") != nullptr)) // short for "device:basic:1"
     {
+#ifdef ESPALEXA_DEBUG
       EA_DEBUGLN("Responding search req...");
+#endif
       respondToSearch();
     }
   }
@@ -428,8 +448,10 @@ public:
   // returns device index or 0 on failure
   uint8_t addDevice(EspalexaDevice *d)
   {
+#ifdef ESPALEXA_DEBUG
     EA_DEBUG("Adding device ");
     EA_DEBUGLN((currentDeviceCount + 1));
+#endif
     if (currentDeviceCount >= ESPALEXA_MAXDEVICES)
       return 0;
     if (d == nullptr)
@@ -440,9 +462,9 @@ public:
   }
   void setFriendlyName(const String name)
   {
-    //EA_DEBUG("setFiendlyName() <- ");
+    // EA_DEBUG("setFiendlyName() <- ");
     _friendlyName = name;
-    //EA_DEBUGLN(_friendlyName);
+    // EA_DEBUGLN(_friendlyName);
   }
 
   // brightness-only callback
@@ -450,8 +472,10 @@ public:
   {
     if (currentDeviceCount >= ESPALEXA_MAXDEVICES)
       return 0;
+#ifdef ESPALEXA_DEBUG
     EA_DEBUG("Constructing device 1");
     EA_DEBUGLN((currentDeviceCount + 1));
+#endif
     EspalexaDevice *d = new EspalexaDevice(deviceName, callback, initialValue);
     return addDevice(d);
   }
@@ -461,8 +485,10 @@ public:
   {
     if (currentDeviceCount >= ESPALEXA_MAXDEVICES)
       return 0;
+#ifdef ESPALEXA_DEBUG
     EA_DEBUG("Constructing device 2");
     EA_DEBUGLN((currentDeviceCount + 1));
+#endif
     EspalexaDevice *d = new EspalexaDevice(deviceName, callback, initialValue);
     return addDevice(d);
   }
@@ -471,8 +497,10 @@ public:
   {
     if (currentDeviceCount >= ESPALEXA_MAXDEVICES)
       return 0;
+#ifdef ESPALEXA_DEBUG
     EA_DEBUG("Constructing device 3");
     EA_DEBUGLN((currentDeviceCount + 1));
+#endif
     EspalexaDevice *d = new EspalexaDevice(deviceName, callback, t, initialValue);
     return addDevice(d);
   }
@@ -502,14 +530,19 @@ public:
   bool handleAlexaApiCall(String req, String body)
   {
 #endif
+#ifdef ESPALEXA_DEBUG
     EA_DEBUGLN("AlexaApiCall");
+#endif
     if (req.indexOf("api") < 0)
       return false; // return if not an API call
+#ifdef ESPALEXA_DEBUG
     EA_DEBUGLN("ok");
-
+#endif
     if (body.indexOf("devicetype") > 0) // client wants a hue api username, we don't care and give static
     {
+#ifdef ESPALEXA_DEBUG
       EA_DEBUGLN("devType");
+#endif
       body = "";
       server->send(200, "application/json", F("[{\"success\":{\"username\":\"2WLEDHardQrI3WHYTHoMcXHgEspsM8ZZRpSKtBQr\"}}]"));
       return true;
@@ -520,9 +553,11 @@ public:
       server->send(200, "application/json", F("[{\"success\":{\"/lights/1/state/\": true}}]"));
 
       uint32_t devId = req.substring(req.indexOf("lights") + 7).toInt();
+#ifdef ESPALEXA_DEBUG
       EA_DEBUG("ls");
       EA_DEBUGLN(devId);
       EA_DEBUGLN(devId);
+#endif
       unsigned idx = decodeLightKey(devId);
       if (idx >= currentDeviceCount)
         return true; // return if invalid ID
@@ -589,12 +624,15 @@ public:
     if (pos > 0) // client wants light info
     {
       int devId = req.substring(pos + 7).toInt();
+#ifdef ESPALEXA_DEBUG
       EA_DEBUG("l");
       EA_DEBUGLN(devId);
-
+#endif
       if (devId == 0) // client wants all lights
       {
+#ifdef ESPALEXA_DEBUG
         EA_DEBUGLN("lAll");
+#endif
         String jsonTemp = "{";
         for (int i = 0; i < currentDeviceCount; i++)
         {
@@ -614,7 +652,9 @@ public:
       }
       else // client wants one light (devId)
       {
+#ifdef ESPALEXA_DEBUG
         EA_DEBUGLN(devId);
+#endif
         unsigned idx = decodeLightKey(devId);
         if (idx < currentDeviceCount)
         {
